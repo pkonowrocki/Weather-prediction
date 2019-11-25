@@ -35,7 +35,7 @@ grayCode = {
     'Wind blowing from the west' : '0;1;0;0;1',
     'Wind blowing from the west-northwest' : '0;1;0;0;0',
     'Wind blowing from the north-west' : '1;1;0;0;0',
-    'Wind blowing from the north-northwest' : '1;1;0;0;1',
+    'Wind blowing from the north-northwest' : '1;0;0;0;0',
 }
 
 cloudsOktaCode = {
