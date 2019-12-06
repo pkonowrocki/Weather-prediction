@@ -16,7 +16,8 @@ def groupByCityAndSave(data, filepath):
     data["hour"] = pd.DatetimeIndex(data["Local time"]).hour
     groups = list(data.groupby('City'))
     for group in groups:
-        group[1].to_csv(f'{filepath}{group[0]}', header=False, index=False)
+        temp = group[1].drop(columns='City')
+        temp.to_csv(f'{filepath}{group[0]}', header=False, index=False)
     return [group[0] for group in groups]
 
 def changeWithDictionaryAndSave(file, cloudsDictionary, windDictionary, filepath, filename):
@@ -30,7 +31,7 @@ def changeWithDictionaryAndSave(file, cloudsDictionary, windDictionary, filepath
         for k in windDictionary.keys():
             text = text.replace(k, windDictionary[k])
 
-        with open(f'{filepath}{filename}', 'w') as temp:
+        with open(f'{filepath}{filename}', 'w', encoding="UTF-8") as temp:
             temp.write(text.replace('"',''))
 
 def main(filenames, folder):
