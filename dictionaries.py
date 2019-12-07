@@ -16,9 +16,12 @@ naturalCode = {
     'Wind blowing from the east' : '0,1,0,0',
     'Wind blowing from the west' : '0,0,1,0',
     '"Calm, no wind"' : '0,0,0,0',
+    'variable wind direction' : '0.25,0.25,0.25,0.25',
+    'D,' : 'DN,DE,DW,DS,'
 }
 
 grayCode = {
+    'variable wind direction' : '1,1,1,1,1',
     '"Calm, no wind"' : '0,0,0,0,0',
     'Wind blowing from the east-northeast' : '0,0,1,1,1',
     'Wind blowing from the south-southeast' : '0,1,1,0,1',
@@ -36,6 +39,7 @@ grayCode = {
     'Wind blowing from the east' : '0,0,1,0,1',
     'Wind blowing from the south' : '0,1,1,1,1',
     'Wind blowing from the west' : '0,1,0,0,1',
+    'D,' : 'D1,D2,D3,D4,D5,'
 }
 
 cloudsOktaCode = {
@@ -62,4 +66,5 @@ cloudsOktaStupidCode = {
     '90  or more, but not 100%' : '0,0,1,0,0,0,0,0,0,0',
     '100%.' : '0,1,0,0,0,0,0,0,0,0',
     'Sky obscured by fog and/or other meteorological phenomena.' : '1,0,0,0,0,0,0,0,0,0',
+    'N,' : 'N1,N2,N3,N4,N5,N6,N7,N8,N9,N10,',
 }
