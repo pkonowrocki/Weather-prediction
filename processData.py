@@ -1,8 +1,9 @@
 import pandas as pd
 import os
 import dictionaries as d
+import numpy as np
 from io import StringIO 
-from fancyimpute import KNN
+from fancyimpute import SimpleFill
 import copy
 
 globalPath = 'projekt_3_dane/'
@@ -16,9 +17,8 @@ def groupByCityAndSave(data, filepath, isTemperature = False):
     if not os.path.exists(filepath):
         os.makedirs(filepath)
     data["month"] = pd.DatetimeIndex(data["Local time"]).month
-    data["hour"] = pd.DatetimeIndex(data["Local time"]).hour
-    data["helper"] = data["T" if isTemperature else "VV"]
-    data = data.drop(columns="T" if isTemperature else "VV")
+    data["helper"] = data["T" if isTemperature else "Ff"]
+    data = data.drop(columns="T" if isTemperature else "Ff")
 
     groups = list(data.groupby('City'))
     for group in groups:
@@ -43,9 +43,16 @@ def changeWithDictionaryAndSave(file, cloudsDictionary, windDictionary, filepath
         df = pd.read_csv(StringIO(text.replace('"','')), header = None)
         if imputation:
             df = prepareImputation(df)
-        df = prepareDayMean(df)
-        if not isTemperature:
+        if isTemperature:
+            df = prepareDayMean(df, imputation)
+            # df = df.drop(columns=1)
+        else:
+            df = prepareDayMax(df, imputation)
             df = prepareForClassification(df)
+            # df = df.drop(columns=0)
+        # print(df)
+        # quit()
+        print(f'SAVE: {filepath}/{filename}')
         df.to_csv(f'{filepath}/{filename}', header = False, index = True)
 
 def separateByCityAndCodes(filenames, folder, isTemperature = False, imputation = True):
@@ -72,27 +79,39 @@ def prepareForWindClassification():
     separateByCityAndCodes(filenames = ['test_1', 'test_2'], folder='wind/noImputation/test/', isTemperature=False, imputation=False)
 
 def prepareImputation(df):
-    afterImputation = pd.DataFrame(KNN(k = 3).fit_transform(df.loc[:, df.columns != 0]))
+    afterImputation = pd.DataFrame(SimpleFill().fit_transform(df.loc[:, df.columns != 0]))
     for c in afterImputation.columns:
         df[c+1] = afterImputation[c].values
     return df
 
-def prepareDayMean(df):
+def prepareDayMean(df, imputation):
     df[0] = pd.to_datetime(df[0])
     groups = df.groupby(df[0].dt.floor('d'))
     i = 0
     for group in groups:
-        if not (group[1].shape[0] == 8 and not group[1].isnull().values.any()):
+        if not (group[1].shape[0] == 8 and not group[1].isnull().values.any()) and not imputation:
             df = df[df[0].dt.floor('d') != group[0]]
             i += 1
-    print(f'deleted {i} days')
+    return pd.DataFrame(df.groupby(df[0].dt.floor('d')).mean())
+
+def prepareDayMax(df, imputation):
+    df[0] = pd.to_datetime(df[0])
+    groups = df.groupby(df[0].dt.floor('d'))
+    i = 0
+    for group in groups:      
+        if not (group[1].shape[0] == 8 and not group[1].isnull().values.any()) and not imputation:
+            df = df[df[0].dt.floor('d') != group[0]]
+            i += 1
+        else:
+            max = np.max(group[1][group[1].columns[-1]])
+            df.loc[df[0].dt.floor('d') == group[0], df.columns[-1]] = max
+  
     return pd.DataFrame(df.groupby(df[0].dt.floor('d')).mean())
 
 
 def prepareForClassification(df):
-    df[df.columns[-1]] = 1 if df[df.columns[-1]]>=15 else 0
+    df[df.columns[-1]] = df[df.columns[-1]].apply(lambda x: 1.0 if x >= 9 else 0.0)
     return df
-
 
 if __name__ == "__main__":
     prepareForTemperatureRegression()
